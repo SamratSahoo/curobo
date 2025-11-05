@@ -269,45 +269,60 @@ class CollisionQueryBuffer:
             self.create_from_shape(shape, tensor_args, collision_types)
             return
 
+        # Update each buffer type
         collision_types = collision_types or {}
-
-        # Primitive collision buffer
-        should_exist = collision_types.get("primitive", self.primitive_collision_buffer is not None)
-        if should_exist and self.primitive_collision_buffer is None:
-            self.primitive_collision_buffer = CollisionBuffer.initialize_from_shape(shape, tensor_args)
-        elif should_exist:
-            self.primitive_collision_buffer.update_buffer_shape(shape, tensor_args)
-        elif not should_exist and self.primitive_collision_buffer is not None:
-            self.primitive_collision_buffer = None
-
-        # Mesh collision buffer
-        should_exist = collision_types.get("mesh", self.mesh_collision_buffer is not None)
-        if should_exist and self.mesh_collision_buffer is None:
-            self.mesh_collision_buffer = CollisionBuffer.initialize_from_shape(shape, tensor_args)
-        elif should_exist:
-            self.mesh_collision_buffer.update_buffer_shape(shape, tensor_args)
-        elif not should_exist and self.mesh_collision_buffer is not None:
-            self.mesh_collision_buffer = None
-
-        # Blox collision buffer
-        should_exist = collision_types.get("blox", self.blox_collision_buffer is not None)
-        if should_exist and self.blox_collision_buffer is None:
-            self.blox_collision_buffer = CollisionBuffer.initialize_from_shape(shape, tensor_args)
-        elif should_exist:
-            self.blox_collision_buffer.update_buffer_shape(shape, tensor_args)
-        elif not should_exist and self.blox_collision_buffer is not None:
-            self.blox_collision_buffer = None
-
-        # Voxel collision buffer
-        should_exist = collision_types.get("voxel", self.voxel_collision_buffer is not None)
-        if should_exist and self.voxel_collision_buffer is None:
-            self.voxel_collision_buffer = CollisionBuffer.initialize_from_shape(shape, tensor_args)
-        elif should_exist:
-            self.voxel_collision_buffer.update_buffer_shape(shape, tensor_args)
-        elif not should_exist and self.voxel_collision_buffer is not None:
-            self.voxel_collision_buffer = None
-
+        self.primitive_collision_buffer = self._update_single_buffer(
+            self.primitive_collision_buffer,
+            collision_types.get("primitive", self.primitive_collision_buffer is not None),
+            shape,
+            tensor_args,
+        )
+        self.mesh_collision_buffer = self._update_single_buffer(
+            self.mesh_collision_buffer,
+            collision_types.get("mesh", self.mesh_collision_buffer is not None),
+            shape,
+            tensor_args,
+        )
+        self.blox_collision_buffer = self._update_single_buffer(
+            self.blox_collision_buffer,
+            collision_types.get("blox", self.blox_collision_buffer is not None),
+            shape,
+            tensor_args,
+        )
+        self.voxel_collision_buffer = self._update_single_buffer(
+            self.voxel_collision_buffer,
+            collision_types.get("voxel", self.voxel_collision_buffer is not None),
+            shape,
+            tensor_args,
+        )
         self.shape = shape
+
+    @classmethod
+    def _update_single_buffer(
+        cls,
+        current_buffer: Optional[CollisionBuffer],
+        should_exist: bool,
+        shape: torch.Size,
+        tensor_args: TensorDeviceType,
+    ) -> Optional[CollisionBuffer]:
+        """Helper to update a single collision buffer.
+
+        Args:
+            current_buffer: Existing buffer or None.
+            should_exist: Whether this buffer should exist.
+            shape: Target shape for the buffer.
+            tensor_args: Device and precision of the tensors.
+
+        Returns:
+            Updated, new, or None buffer depending on should_exist.
+        """
+        if should_exist and current_buffer is None:
+            return CollisionBuffer.initialize_from_shape(shape, tensor_args)
+        elif should_exist:
+            current_buffer.update_buffer_shape(shape, tensor_args)
+            return current_buffer
+        else:
+            return None
 
     def get_gradient_buffer(
         self,
