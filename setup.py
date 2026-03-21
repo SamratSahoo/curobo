@@ -32,10 +32,19 @@ _FINGERPRINT_FILE = _LIB_DIR / ".build_fingerprint"
 
 
 
+def _env_fingerprint() -> str:
+    """Identity string for the current build environment (Python ABI + PyTorch + CUDA)."""
+    import torch
+
+    ext_suffix = importlib.machinery.EXTENSION_SUFFIXES[0]  # e.g. .cpython-312-x86_64-linux-gnu.so
+    return f"{ext_suffix}|torch={torch.__version__}|cuda={torch.version.cuda}"
+
+
 def _source_fingerprint() -> str:
-    """SHA-256 of all CUDA/C++ source contents — content-based, not mtime-based."""
+    """SHA-256 of all CUDA/C++ source contents plus the build environment identity."""
     src_files = sorted((_LIB_DIR / "cpp").glob("*.cu")) + sorted((_LIB_DIR / "cpp").glob("*.cpp"))
     h = hashlib.sha256()
+    h.update(_env_fingerprint().encode())
     for f in src_files:
         h.update(f.read_bytes())
     return h.hexdigest()
