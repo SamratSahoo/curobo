@@ -75,6 +75,14 @@ cost:
     weight: 500.0
     classify: False
 
+  # Uniform joint-space velocity: penalizes deviation of per-timestep speed from the
+  # horizon mean. weight: 0.0 keeps it disabled (no behavior change); raise to enable.
+  # run_weight < 1.0 down-weights interior steps relative to the at-rest endpoints.
+  uniform_velocity_cfg:
+    weight: 0.0
+    terminal: True
+    run_weight: 1.0
+
 
 
 

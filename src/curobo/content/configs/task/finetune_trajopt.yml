@@ -76,6 +76,15 @@ cost:
     weight: 5000.0
     classify: False
 
+  # Uniform joint-space velocity. NOTE: the cuTAMP/tiptop-viz planner disables the
+  # finetune phase (enable_finetune_trajopt=False), so this weight is IGNORED on that
+  # path — set it in gradient_trajopt.yml instead. (It applies only to callers that run
+  # finetune, e.g. a plain MotionGen.plan_single with finetune enabled.)
+  uniform_velocity_cfg:
+    weight: 0.0
+    terminal: True
+    run_weight: 1.0
+
 
 
 lbfgs:

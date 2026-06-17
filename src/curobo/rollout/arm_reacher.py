@@ -22,6 +22,7 @@ from curobo.rollout.cost.cost_base import CostConfig
 from curobo.rollout.cost.dist_cost import DistCost, DistCostConfig
 from curobo.rollout.cost.pose_cost import PoseCost, PoseCostConfig, PoseCostMetric
 from curobo.rollout.cost.straight_line_cost import StraightLineCost
+from curobo.rollout.cost.uniform_velocity_cost import UniformVelocityCost
 from curobo.rollout.cost.zero_cost import ZeroCost
 from curobo.rollout.dynamics_model.kinematic_model import KinematicModelState
 from curobo.rollout.rollout_base import Goal, RolloutMetrics
@@ -90,6 +91,7 @@ class ArmReacherCostConfig(ArmCostConfig):
     zero_vel_cfg: Optional[CostConfig] = None
     zero_jerk_cfg: Optional[CostConfig] = None
     link_pose_cfg: Optional[PoseCostConfig] = None
+    uniform_velocity_cfg: Optional[CostConfig] = None
 
     @staticmethod
     def _get_base_keys():
@@ -103,6 +105,7 @@ class ArmReacherCostConfig(ArmCostConfig):
             "zero_vel_cfg": CostConfig,
             "zero_jerk_cfg": CostConfig,
             "link_pose_cfg": PoseCostConfig,
+            "uniform_velocity_cfg": CostConfig,
         }
         new_k.update(base_k)
         return new_k
@@ -209,6 +212,9 @@ class ArmReacher(ArmBase, ArmReacherConfig):
             self._max_vel = self.state_bounds["velocity"][1]
             if self.zero_jerk_cost.hinge_value is not None:
                 self._compute_g_dist = True
+
+        if self.cost_cfg.uniform_velocity_cfg is not None:
+            self.uniform_velocity_cost = UniformVelocityCost(self.cost_cfg.uniform_velocity_cfg)
 
         self.z_tensor = torch.tensor(
             0, device=self.tensor_args.device, dtype=self.tensor_args.dtype
@@ -323,6 +329,13 @@ class ArmReacher(ArmBase, ArmReacherConfig):
                 g_dist,
             )
             cost_list.append(z_vel)
+
+        if (
+            self.cost_cfg.uniform_velocity_cfg is not None
+            and self.uniform_velocity_cost.enabled
+        ):
+            uniform_vel = self.uniform_velocity_cost.forward(state_batch.velocity)
+            cost_list.append(uniform_vel)
         with profiler.record_function("cat_sum"):
             if self.sum_horizon:
                 cost = cat_sum_horizon_reacher(cost_list)
