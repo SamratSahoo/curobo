@@ -78,7 +78,7 @@ cost:
 
   # Uniform joint-space velocity: penalizes deviation of per-timestep speed from the
   # horizon mean. This is the DECIDING phase for the cuTAMP/tiptop-viz planner, which
-  # plans with enable_finetune_trajopt=False (cutamp motion_solver) — so set the weight
+  # plans with enable_finetune_trajopt=False (cutamp motion_solver) -- so set the weight
   # HERE, not in finetune_trajopt.yml. weight: 0.0 disables; ~20000 flattens the cruise
   # (200000 broke feasibility in testing). run_weight < 1.0 down-weights interior steps.
   uniform_velocity_cfg:
