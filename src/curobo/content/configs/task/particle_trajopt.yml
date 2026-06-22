@@ -83,6 +83,14 @@ cost:
     terminal: True
     run_weight: 1.0
 
+  # VAE motion-manifold cost (see cost/vae_manifold_cost.py). weight: 0.0 keeps it disabled.
+  # The deciding phase for cuTAMP/tiptop-viz is gradient_trajopt.yml; set the weight there.
+  vae_manifold_cfg:
+    weight: 0.0
+    mode: "kl_hinge"
+    n_joints: 7
+    source_dt: 0.15
+
 
 
 
