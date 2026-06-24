@@ -86,16 +86,13 @@ cost:
     terminal: True
     run_weight: 1.0
 
-  # VAE motion-manifold cost: encode each segment's joint vel/accel/jerk with a DROID-trained
-  # beta-VAE and score it against the DROID motion manifold (see cost/vae_manifold_cost.py and
-  # analysis/). This is the DECIDING phase for cuTAMP/tiptop-viz (enable_finetune_trajopt=False),
-  # so set the weight HERE. weight: 0 disables. mode picks the scalar (all are MINIMIZED):
-  #   kl_hinge / maha2_shell -> push the encoding toward DROID's level (toward DROID)
-  #   kl / recon / maha2     -> stay-in-distribution regularizer (cuTAMP already sits low)
-  # checkpoint_path/target fall back to cost-module defaults if omitted.
+  # VAE motion-manifold cost: encode each segment's joint [q|v|a|j] motion with the DROID-trained
+  # Filterbank VAE (tamp-vla/vae/) and MINIMIZE its Mahalanobis distance to the DROID latent
+  # cluster -> pull the motion style toward DROID (see cost/vae_manifold_cost.py). This is the
+  # DECIDING phase for cuTAMP/tiptop-viz (enable_finetune_trajopt=False), so set the weight HERE.
+  # weight: 0 disables. checkpoint_path falls back to the cost-module default (vae/checkpoints/vae.pt).
   vae_manifold_cfg:
     weight: 0.0
-    mode: "kl_hinge"
     n_joints: 7
     source_dt: 0.15
 

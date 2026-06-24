@@ -87,7 +87,6 @@ cost:
   # The deciding phase for cuTAMP/tiptop-viz is gradient_trajopt.yml; set the weight there.
   vae_manifold_cfg:
     weight: 0.0
-    mode: "kl_hinge"
     n_joints: 7
     source_dt: 0.15
 

@@ -90,7 +90,6 @@ cost:
   # gradient_trajopt.yml instead. This applies only to callers that run finetune.
   vae_manifold_cfg:
     weight: 0.0
-    mode: "kl_hinge"
     n_joints: 7
     source_dt: 0.15
 
