@@ -85,6 +85,15 @@ cost:
     terminal: True
     run_weight: 1.0
 
+  # VAE motion-manifold cost (see cost/vae_manifold_cost.py). weight: 0.0 keeps it disabled.
+  # NOTE: cuTAMP/tiptop-viz disables the finetune phase, so set the weight in
+  # gradient_trajopt.yml instead. This applies only to callers that run finetune.
+  vae_manifold_cfg:
+    weight: 0.0
+    mode: "kl_hinge"
+    n_joints: 7
+    source_dt: 0.15
+
 
 
 lbfgs:
